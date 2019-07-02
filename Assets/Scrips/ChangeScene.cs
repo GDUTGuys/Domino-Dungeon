@@ -10,8 +10,12 @@ public class ChangeScene : MonoBehaviour
     {
         if (PlayerPrefs.HasKey("LastestScene"))
         {
-            Button btn = GameObject.Find("ContinueButton").gameObject.GetComponent<Button>();
-            btn.interactable = true;
+            GameObject btnObject = GameObject.Find("ContinueButton");
+            if (btnObject)
+            {
+                Button btn = btnObject.GetComponent<Button>();
+                btn.interactable = true;            
+            }
         }
     }
 

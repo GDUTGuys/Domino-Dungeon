@@ -13,7 +13,18 @@ public class MouseMoverSnap : MonoBehaviour
 	public float xadjust;
 	public float yadjust;
 	public float zadjust;
-	
+
+	private TraySize _traySize;
+	private FloatingControl _floatingControl;
+	private AudioSource _audioSource;
+
+	private void Awake()
+	{
+		_traySize = GameObject.Find("TraySize").GetComponent<TraySize>();
+		_floatingControl = GameObject.Find("Floating Control").GetComponent<FloatingControl>();
+		_audioSource = GetComponent<AudioSource>();
+	}
+
 	// Use this for initialization
 	void Start () {
 			
@@ -35,7 +46,7 @@ public class MouseMoverSnap : MonoBehaviour
 			mouseWorldPos.x = Mathf.RoundToInt(mouseWorldPos.x / 2);
             mouseWorldPos.x = mouseWorldPos.x * 2 - 1 + xadjust;
             mouseWorldPos.z = Mathf.RoundToInt(mouseWorldPos.z / 2);
-            mouseWorldPos.z = mouseWorldPos.z * 2 + zadjust;
+            mouseWorldPos.z = mouseWorldPos.z * 2 - 1 + zadjust;
 			
 			transform.position = mouseWorldPos; //move the transform position to be the mouse world position
 
@@ -46,10 +57,10 @@ public class MouseMoverSnap : MonoBehaviour
 				if (Placed == false && Blocked == false && WithinRange)
 				{
 					isSelected = false;
-					GameObject.Find("Floating Control").GetComponent<FloatingControl>().Floating = false;
+					_floatingControl.Floating = false;
 					GameObject smog = Instantiate(Resources.Load<GameObject>("Particle/SmogEmit"), mouseWorldPos + new Vector3(0, 0.5f, 0), new Quaternion(0,0,0,0));
 					//smog.transform.position = mouseWorldPos + new Vector3(0, 0.5f, 0);
-					GetComponent<AudioSource>().Play();
+					_audioSource.Play();
 					//gameObject.isStatic = true;
 				}
 			}
@@ -69,10 +80,10 @@ public class MouseMoverSnap : MonoBehaviour
 		//Blocked = false;
 
 		//if the domino set is within the tray
-		if (transform.position.x < GameObject.Find("TraySize").GetComponent<TraySize>().xmax && 
-		    transform.position.x > GameObject.Find("TraySize").GetComponent<TraySize>().xmin && 
-		    transform.position.z < GameObject.Find("TraySize").GetComponent<TraySize>().zmax && 
-		    transform.position.z > GameObject.Find("TraySize").GetComponent<TraySize>().zmin)
+		if (transform.position.x < _traySize.xmax && 
+		    transform.position.x > _traySize.xmin && 
+		    transform.position.z < _traySize.zmax && 
+		    transform.position.z > _traySize.zmin)
 		{
 			//print("In the Range!");
 			WithinRange = true;
@@ -86,7 +97,7 @@ public class MouseMoverSnap : MonoBehaviour
 		
 	void OnTriggerExit(Collider other) 
 	{
-		if (other.CompareTag("Set"))
+		if (other.CompareTag("Set") || other.CompareTag("Wall"))
 		{
 			//print(other.name);
 			//print("Put here!");
@@ -97,9 +108,9 @@ public class MouseMoverSnap : MonoBehaviour
 	//Blocked when a domino set overlap with another one
 	void OnTriggerStay(Collider other)
 	{
-		if (other.CompareTag("Set") /*&& Vector3.Distance(other.transform.position, transform.position) < 1*/)
+		if (other.CompareTag("Set") || other.CompareTag("Wall")/*&& Vector3.Distance(other.transform.position, transform.position) < 1*/)
 		{
-			//print(other.name);
+			print(other.name);
             //print("Can't put here!");
             Blocked = true;
 		}
@@ -109,11 +120,11 @@ public class MouseMoverSnap : MonoBehaviour
 	void OnMouseDown() 
 	{
 		if (Placed && 
-		    GameObject.Find("Floating Control").GetComponent<FloatingControl>().Floating == false && 
+		    _floatingControl.Floating == false && 
 		    GameObject.Find("Starting Block").GetComponent<Push>().Fixed == false)
 		{
 			isSelected = true;
-			GameObject.Find("Floating Control").GetComponent<FloatingControl>().Floating = true;
+			_floatingControl.Floating = true;
 			//gameObject.isStatic = false;
 		}
 	}
